@@ -60,6 +60,14 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForBaseConfigErrorCode(Ba
 	}
 }
 
+void Neuropix::Net::NeuropixBasestation::ThrowExceptionForReadErrorCode(ReadErrorCode error, String ^message)
+{
+	if (error != READ_SUCCESS)
+	{
+		throw gcnew System::InvalidOperationException(message);
+	}
+}
+
 void Neuropix::Net::NeuropixBasestation::Open()
 {
 	Open(0);
@@ -116,7 +124,7 @@ void Neuropix::Net::NeuropixBasestation::ApplyAdcCalibrationFromCsv(String ^comp
 
 	// Write parameters to probe
 	BaseConfigErrorCode configError;
-	for (size_t i = 0; i < 15; i = i + 2)
+	for (int i = 0; i < 15; i += 2)
 	{
 		configError = api->neuropix_ADCCalibration(
 			i,
@@ -216,6 +224,18 @@ void Neuropix::Net::NeuropixBasestation::LedOff(bool ledOff)
 {
 	DigitalControlErrorCode error = api->neuropix_ledOff(ledOff);
 	ThrowExceptionForDigitalControlErrorCode(error, "Error setting headstage LED state.");
+}
+
+void Neuropix::Net::NeuropixBasestation::NeuralStart()
+{
+	ConfigAccessErrorCode error = api->neuropix_setNeuralStart();
+	ThrowExceptionForConfigAccessErrorCode(error, "Unable to set neural start trigger.");
+}
+
+void Neuropix::Net::NeuropixBasestation::ReadElectrodeData(ElectrodePacket ^packet)
+{
+	ReadErrorCode error = api->neuropix_readElectrodeData(*(packet->packet));
+	ThrowExceptionForReadErrorCode(error, "Unable to read electrode data.");
 }
 
 void Neuropix::Net::NeuropixBasestation::StartRecording(String ^fileName)

@@ -2,16 +2,12 @@
 
 using namespace System;
 #include "Neuropix_basestation_api.h"
+#include "ElectrodePacket.h"
 
 namespace Neuropix
 {
 	namespace Net
 	{
-		public value class ElectrodePacket
-		{
-		public:
-		};
-
 		public value class AsicID {
 		public:
 			unsigned int SerialNumber;
@@ -37,6 +33,14 @@ namespace Neuropix
 			}
 		};
 
+		public enum class AsicMode
+		{
+			Configuration = ASIC_CONFIGURATION,
+			Calibration = ASIC_CALIBRATION,
+			Impedance = ASIC_IMPEDANCE,
+			Recording = ASIC_RECORDING
+		};
+
 		public ref class NeuropixBasestation
 		{
 		private:
@@ -47,6 +51,7 @@ namespace Neuropix
 			static void ThrowExceptionForDigitalControlErrorCode(DigitalControlErrorCode error, String ^message);
 			static void ThrowExceptionForReadCsvErrorCode(ReadCsvErrorCode error, String ^message);
 			static void ThrowExceptionForBaseConfigErrorCode(BaseConfigErrorCode error, String ^message);
+			static void ThrowExceptionForReadErrorCode(ReadErrorCode error, String ^message);
 			~NeuropixBasestation() { this->!NeuropixBasestation(); }
 			!NeuropixBasestation();
 		public:
@@ -75,6 +80,8 @@ namespace Neuropix
 			void ConfigureDeserializer();
 			void ConfigureSerializer();
 
+			void NeuralStart();
+			void ReadElectrodeData(ElectrodePacket ^packet);
 			void StartRecording(String ^fileName);
 			void StopRecording();
 
@@ -96,6 +103,36 @@ namespace Neuropix
 				float get()
 				{
 					return api->neuropix_getScaleFactorToVoltage();
+				}
+			}
+
+			property AsicMode Mode {
+				AsicMode get()
+				{
+					unsigned char mode;
+					DigitalControlErrorCode error = api->neuropix_readMode(mode);
+					ThrowExceptionForDigitalControlErrorCode(error, "Unable to read ASIC mode.");
+					return (AsicMode)mode;
+				}
+				void set(AsicMode value)
+				{
+					DigitalControlErrorCode error = api->neuropix_mode((unsigned char)value);
+					ThrowExceptionForDigitalControlErrorCode(error, "Unable to set ASIC mode.");
+				}
+			}
+
+			property bool TriggerMode {
+				bool get()
+				{
+					bool triggerMode;
+					ConfigAccessErrorCode error = api->neuropix_getTriggerMode(triggerMode);
+					ThrowExceptionForConfigAccessErrorCode(error, "Unable to read trigger mode.");
+					return triggerMode;
+				}
+				void set(bool value)
+				{
+					ConfigAccessErrorCode error = api->neuropix_triggerMode(value);
+					ThrowExceptionForConfigAccessErrorCode(error, "Unable to set trigger mode.");
 				}
 			}
 		};
