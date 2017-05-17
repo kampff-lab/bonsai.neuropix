@@ -87,12 +87,16 @@ namespace Bonsai.Neuropix
                         basestation.NeuralStart();
                         Console.WriteLine("Neuropix recording start...");
 
+                        int packetCounter = 0;
+                        float bufferCapacity = 0;
                         var packet = new ElectrodePacket();
                         while (!cancellationToken.IsCancellationRequested)
                         {
+                            if (packetCounter == 0) bufferCapacity = basestation.FifoFilling;
                             basestation.ReadElectrodeData(packet);
-                            var result = new NeuropixDataFrame(packet, 0);
+                            var result = new NeuropixDataFrame(packet, bufferCapacity);
                             observer.OnNext(result);
+                            packetCounter = (packetCounter + 1) % 50;
                         }
 
                         Console.WriteLine("Neuropix stop recording...");
