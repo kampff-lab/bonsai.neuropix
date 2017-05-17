@@ -20,6 +20,46 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForErrorCode(ErrorCode er
 	}
 }
 
+void Neuropix::Net::NeuropixBasestation::ThrowExceptionForConfigAccessErrorCode(ConfigAccessErrorCode error, String ^message)
+{
+	if (error != CONFIG_SUCCESS)
+	{
+		throw gcnew System::InvalidOperationException(message);
+	}
+}
+
+void Neuropix::Net::NeuropixBasestation::ThrowExceptionForEepromErrorCode(EepromErrorCode error, String ^message)
+{
+	if (error != EEPROM_SUCCESS)
+	{
+		throw gcnew System::InvalidOperationException(message);
+	}
+}
+
+void Neuropix::Net::NeuropixBasestation::ThrowExceptionForDigitalControlErrorCode(DigitalControlErrorCode error, String ^message)
+{
+	if (error != DIGCTRL_SUCCESS)
+	{
+		throw gcnew System::InvalidOperationException(message);
+	}
+}
+
+void Neuropix::Net::NeuropixBasestation::ThrowExceptionForReadCsvErrorCode(ReadCsvErrorCode error, String ^message)
+{
+	if (error != READCSV_SUCCESS)
+	{
+		throw gcnew System::InvalidOperationException(message);
+	}
+}
+
+void Neuropix::Net::NeuropixBasestation::ThrowExceptionForBaseConfigErrorCode(BaseConfigErrorCode error, String ^message)
+{
+	if (error != BASECONFIG_SUCCESS)
+	{
+		throw gcnew System::InvalidOperationException(message);
+	}
+}
+
 void Neuropix::Net::NeuropixBasestation::Open()
 {
 	Open(0);
@@ -27,13 +67,7 @@ void Neuropix::Net::NeuropixBasestation::Open()
 
 void Neuropix::Net::NeuropixBasestation::Open(Byte headstageSelect)
 {
-	Open(headstageSelect, "10.2.0.1");
-}
-
-void Neuropix::Net::NeuropixBasestation::Open(Byte headstageSelect, String ^ipAddress)
-{
-	std::string _ipAddress = msclr::interop::marshal_as<std::string>(ipAddress);
-	OpenErrorCode error = api->neuropix_open(headstageSelect, _ipAddress);
+	OpenErrorCode error = api->neuropix_open(headstageSelect);
 	if (error != OPEN_SUCCESS)
 	{
 	}
@@ -57,6 +91,56 @@ void Neuropix::Net::NeuropixBasestation::ApplyAdcCalibrationFromEeprom()
 {
 	ErrorCode error = api->neuropix_applyAdcCalibrationFromEeprom();
 	ThrowExceptionForErrorCode(error, "Unable to apply ADC calibration.");
+}
+
+void Neuropix::Net::NeuropixBasestation::ApplyAdcCalibrationFromCsv(String ^comparatorCalibrationFileName, String ^adcOffsetCalibrationFileName, String ^adcSlopeCalibrationFileName)
+{
+	std::string _comparatorCalibrationFileName = msclr::interop::marshal_as<std::string>(comparatorCalibrationFileName);
+	ReadCsvErrorCode csvError = api->neuropix_readComparatorCalibrationFromCsv(_comparatorCalibrationFileName);
+	ThrowExceptionForReadCsvErrorCode(csvError, "Unable to read comparator calibration data from the specified file.");
+
+	std::string _adcOffsetCalibrationFileName = msclr::interop::marshal_as<std::string>(adcOffsetCalibrationFileName);
+	csvError = api->neuropix_readADCOffsetCalibrationFromCsv(_adcOffsetCalibrationFileName);
+	ThrowExceptionForReadCsvErrorCode(csvError, "Unable to read ADC offset calibration data from the specified file.");
+
+	std::string _adcSlopeCalibrationFileName = msclr::interop::marshal_as<std::string>(adcSlopeCalibrationFileName);
+	csvError = api->neuropix_readADCSlopeCalibrationFromCsv(_adcSlopeCalibrationFileName);
+	ThrowExceptionForReadCsvErrorCode(csvError, "Unable to read ADC slope calibration data from the specified file.");
+
+	std::vector<adcComp> adcCompC;
+	std::vector<adcPairCommon> adcPairCommonC;
+	ErrorCode error = api->neuropix_getADCCompCalibration(adcCompC);
+	ThrowExceptionForErrorCode(error, "Unable to read ADC comparator calibration.");
+	error = api->neuropix_getADCPairCommonCalibration(adcPairCommonC);
+	ThrowExceptionForErrorCode(error, "Unable to read ADC offset and slope calibration.");
+
+	// Write parameters to probe
+	BaseConfigErrorCode configError;
+	for (size_t i = 0; i < 15; i = i + 2)
+	{
+		configError = api->neuropix_ADCCalibration(
+			i,
+			adcCompC[2 * i].compP,
+			adcCompC[2 * i].compN,
+			adcCompC[2 * i + 2].compP,
+			adcCompC[2 * i + 2].compN,
+			adcPairCommonC[i].slope,
+			adcPairCommonC[i].fine,
+			adcPairCommonC[i].coarse,
+			adcPairCommonC[i].cfix);
+		ThrowExceptionForBaseConfigErrorCode(configError, "Unable to write ADC configuration register on the probe.");
+		configError = api->neuropix_ADCCalibration(
+			i + 1,
+			adcCompC[2 * i + 1].compP,
+			adcCompC[2 * i + 1].compN,
+			adcCompC[2 * i + 3].compP,
+			adcCompC[2 * i + 3].compN,
+			adcPairCommonC[i + 1].slope,
+			adcPairCommonC[i + 1].fine,
+			adcPairCommonC[i + 1].coarse,
+			adcPairCommonC[i + 1].cfix);
+		ThrowExceptionForBaseConfigErrorCode(configError, "Unable to write ADC configuration register on the probe.");
+	}
 }
 
 void Neuropix::Net::NeuropixBasestation::ApplyGainCalibrationFromEeprom()
@@ -89,6 +173,49 @@ Neuropix::Net::VersionNumber Neuropix::Net::NeuropixBasestation::GetAPIVersion()
 {
 	::VersionNumber version = api->neuropix_getAPIVersion();
 	return VersionNumber(version.major, version.minor);
+}
+
+Neuropix::Net::VersionNumber Neuropix::Net::NeuropixBasestation::GetBSVersion()
+{
+	unsigned char major, minor;
+	ConfigAccessErrorCode error = api->neuropix_getBSVersion(major);
+	ThrowExceptionForConfigAccessErrorCode(error, "No existing config link.");
+	error = api->neuropix_getBSRevision(minor);
+	ThrowExceptionForConfigAccessErrorCode(error, "No existing config link.");
+	return VersionNumber(major, minor);
+}
+
+Neuropix::Net::AsicID Neuropix::Net::NeuropixBasestation::ReadID()
+{
+	::AsicID id;
+	EepromErrorCode error = api->neuropix_readId(id);
+	ThrowExceptionForEepromErrorCode(error, "Error reading probe ID from EEPROM.");
+	return AsicID(id.serialNumber, id.probeType);
+}
+
+void Neuropix::Net::NeuropixBasestation::WriteID(Neuropix::Net::AsicID id)
+{
+	::AsicID _id;
+	_id.probeType = id.ProbeType;
+	_id.serialNumber = id.SerialNumber;
+	EepromErrorCode error = api->neuropix_writeId(_id);
+	ThrowExceptionForEepromErrorCode(error, "Error writing probe ID to EEPROM.");
+}
+
+unsigned char Neuropix::Net::NeuropixBasestation::GetOption()
+{
+	return api->neuropix_getOption();
+}
+
+void Neuropix::Net::NeuropixBasestation::StartLog()
+{
+	api->neuropix_startLog();
+}
+
+void Neuropix::Net::NeuropixBasestation::LedOff(bool ledOff)
+{
+	DigitalControlErrorCode error = api->neuropix_ledOff(ledOff);
+	ThrowExceptionForDigitalControlErrorCode(error, "Error setting headstage LED state.");
 }
 
 void Neuropix::Net::NeuropixBasestation::StartRecording(String ^fileName)

@@ -12,6 +12,18 @@ namespace Neuropix
 		public:
 		};
 
+		public value class AsicID {
+		public:
+			unsigned int SerialNumber;
+			unsigned char ProbeType;
+
+			AsicID(unsigned int serialNumber, char probeType):
+				SerialNumber(serialNumber),
+				ProbeType(probeType)
+			{
+			}
+		};
+
 		public value class VersionNumber
 		{
 		public:
@@ -30,6 +42,11 @@ namespace Neuropix
 		private:
 			Neuropix_basestation_api *api;
 			static void ThrowExceptionForErrorCode(ErrorCode error, String ^message);
+			static void ThrowExceptionForConfigAccessErrorCode(ConfigAccessErrorCode error, String ^message);
+			static void ThrowExceptionForEepromErrorCode(EepromErrorCode error, String ^message);
+			static void ThrowExceptionForDigitalControlErrorCode(DigitalControlErrorCode error, String ^message);
+			static void ThrowExceptionForReadCsvErrorCode(ReadCsvErrorCode error, String ^message);
+			static void ThrowExceptionForBaseConfigErrorCode(BaseConfigErrorCode error, String ^message);
 			~NeuropixBasestation() { this->!NeuropixBasestation(); }
 			!NeuropixBasestation();
 		public:
@@ -37,17 +54,26 @@ namespace Neuropix
 
 			void Open();
 			void Open(Byte headstageSelect);
-			void Open(Byte headstageSelect, String ^ipAddress);
 			void Open(String ^playbackFile);
 			void Close();
 
+			VersionNumber GetHardwareVersion();
+			VersionNumber GetAPIVersion();
+			VersionNumber GetBSVersion();
+
+			AsicID ReadID();
+			void WriteID(AsicID id);
+			unsigned char GetOption();
+
+			void StartLog();
+			void LedOff(bool ledOff);
+
 			void ApplyAdcCalibrationFromEeprom();
+			void ApplyAdcCalibrationFromCsv(String ^comparatorCalibrationFileName, String ^adcOffsetCalibrationFileName, String ^adcSlopeCalibrationFileName);
+
 			void ApplyGainCalibrationFromEeprom();
 			void ConfigureDeserializer();
 			void ConfigureSerializer();
-
-			VersionNumber GetHardwareVersion();
-			VersionNumber GetAPIVersion();
 
 			void StartRecording(String ^fileName);
 			void StopRecording();
