@@ -41,6 +41,13 @@ namespace Neuropix
 			Recording = ASIC_RECORDING
 		};
 
+		public enum class FilterBandwidth
+		{
+			HighPass300Hz = 0,
+			HighPass500Hz = 1,
+			HighPass1kHz = 3
+		};
+
 		public ref class NeuropixBasestation
 		{
 		private:
@@ -77,10 +84,15 @@ namespace Neuropix
 			void ApplyAdcCalibrationFromCsv(String ^comparatorCalibrationFileName, String ^adcOffsetCalibrationFileName, String ^adcSlopeCalibrationFileName);
 
 			void ApplyGainCalibrationFromEeprom();
+			void ApplyGainCalibrationFromCsv(String ^gainCalibrationFileName);
 			void ConfigureDeserializer();
 			void ConfigureSerializer();
 
+			void SetFilter(FilterBandwidth filter);
+			void SetNrst(bool nrst);
+
 			void NeuralStart();
+			void ResetDatapath();
 			void ReadElectrodeData(ElectrodePacket ^packet);
 			void StartRecording(String ^fileName);
 			void StopRecording();
@@ -118,6 +130,15 @@ namespace Neuropix
 				{
 					DigitalControlErrorCode error = api->neuropix_mode((unsigned char)value);
 					ThrowExceptionForDigitalControlErrorCode(error, "Unable to set ASIC mode.");
+				}
+			}
+
+			property bool DataMode {
+				bool get() { return api->neuropix_getDatamode(); }
+				void set(bool value)
+				{
+					ErrorCode error = api->neuropix_datamode(value);
+					ThrowExceptionForErrorCode(error, "Unable to set electrode data mode.");
 				}
 			}
 

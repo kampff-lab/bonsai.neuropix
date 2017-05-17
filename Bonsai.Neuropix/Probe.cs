@@ -14,6 +14,16 @@ namespace Bonsai.Neuropix
     {
         public string FileName { get; set; }
 
+        public string GainCalibration { get; set; }
+
+        public string ComparatorCalibration { get; set; }
+
+        public string AdcOffsetCalibration { get; set; }
+
+        public string AdcSlopeCalibration { get; set; }
+
+        public FilterBandwidth FilterBandwidth { get; set; }
+
         public override IObservable<NeuropixDataFrame> Generate()
         {
             return Observable.Create<NeuropixDataFrame>((observer, cancellationToken) =>
@@ -37,35 +47,51 @@ namespace Bonsai.Neuropix
                         Console.WriteLine("Neuropix probe S/N: {0} Option {1}", probeID.SerialNumber, probeID.ProbeType);
 
                         Console.Write("Neuropix ADC calibration... ");
-                        basestation.ApplyAdcCalibrationFromEeprom();
+                        var comparatorCalibration = ComparatorCalibration;
+                        var adcOffsetCalibration = AdcOffsetCalibration;
+                        var adcSlopeCalibration = AdcSlopeCalibration;
+                        if(!string.IsNullOrEmpty(comparatorCalibration) &&
+                           !string.IsNullOrEmpty(adcOffsetCalibration) &&
+                           !string.IsNullOrEmpty(adcSlopeCalibration))
+                        {
+                            basestation.ApplyAdcCalibrationFromCsv(comparatorCalibration, adcOffsetCalibration, adcSlopeCalibration);
+                        }
+                        else basestation.ApplyAdcCalibrationFromEeprom();
                         Console.WriteLine("OK");
 
-                        //Console.Write("Neuropix Gain calibration... ");
-                        //basestation.ApplyGainCalibrationFromEeprom();
-                        //Console.WriteLine("OK");
+                        basestation.SetFilter(FilterBandwidth);
 
-                        basestation.Mode = AsicMode.Recording;
-                        basestation.TriggerMode = false;
-                        Console.WriteLine("Neuropix start recording...");
-
-                        //basestation.ApplyAdcCalibrationFromCsv(
-                        //    @"C:\Repos\Bonsai.Neuropix\Externals\probecalib\15039702372\Comparator calibration.csv",
-                        //    @"C:\Repos\Bonsai.Neuropix\Externals\probecalib\15039702372\Offset calibration.csv",
-                        //    @"C:\Repos\Bonsai.Neuropix\Externals\probecalib\15039702372\Slope calibration.csv");
+                        Console.Write("Neuropix Gain calibration... ");
+                        var gainCalibration = GainCalibration;
+                        if(!string.IsNullOrEmpty(gainCalibration))
+                        {
+                            basestation.ApplyGainCalibrationFromCsv(gainCalibration);
+                        }
+                        else basestation.ApplyGainCalibrationFromEeprom();
+                        Console.WriteLine("OK");
 
                         basestation.LedOff(true);
+                        basestation.Mode = AsicMode.Recording;
+                        basestation.DataMode = true;
+                        basestation.TriggerMode = false;
+                        basestation.SetNrst(false);
+                        basestation.ResetDatapath();
                         var fileName = FileName;
                         if (!string.IsNullOrEmpty(fileName))
                         {
                             basestation.StartRecording(FileName);
                         }
+                        Console.WriteLine("Neuropix recording armed.");
+
+                        basestation.SetNrst(true);
                         basestation.NeuralStart();
+                        Console.WriteLine("Neuropix recording start...");
 
                         var packet = new ElectrodePacket();
                         while (!cancellationToken.IsCancellationRequested)
                         {
                             basestation.ReadElectrodeData(packet);
-                            var result = new NeuropixDataFrame(packet, basestation.FifoFilling);
+                            var result = new NeuropixDataFrame(packet, 0);
                             observer.OnNext(result);
                         }
 

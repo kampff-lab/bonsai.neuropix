@@ -157,6 +157,30 @@ void Neuropix::Net::NeuropixBasestation::ApplyGainCalibrationFromEeprom()
 	ThrowExceptionForErrorCode(error, "Unable to apply Gain calibration.");
 }
 
+void Neuropix::Net::NeuropixBasestation::ApplyGainCalibrationFromCsv(String ^fileName)
+{
+	std::string _fileName = msclr::interop::marshal_as<std::string>(fileName);
+	ReadCsvErrorCode csvError = api->neuropix_readGainCalibrationFromCsv(_fileName);
+	ThrowExceptionForReadCsvErrorCode(csvError, "Unable to read gain calibration data from the specified file.");
+
+	std::vector<unsigned short> gainCorrectionData;
+	ErrorCode error = api->neuropix_getGainCorrectionCalibration(gainCorrectionData);
+	ThrowExceptionForErrorCode(error, "Unable to read gain calibration.");
+
+	// Resize according to probe type
+	unsigned int option = api->neuropix_getOption();
+	if (option < 2)
+		gainCorrectionData.resize(384);
+	else if (option == 2)
+		gainCorrectionData.resize(960);
+	else if (option == 3) 
+		gainCorrectionData.resize(966);
+
+	//Write to basestation FPGA
+	ConfigAccessErrorCode configError = api->neuropix_gainCorrection(gainCorrectionData);
+	ThrowExceptionForConfigAccessErrorCode(configError, "Unable to write gain calibration to FPGA registers.");
+}
+
 void Neuropix::Net::NeuropixBasestation::ConfigureDeserializer()
 {
 	ErrorCode error = api->neuropix_configureDeserializer();
@@ -226,10 +250,28 @@ void Neuropix::Net::NeuropixBasestation::LedOff(bool ledOff)
 	ThrowExceptionForDigitalControlErrorCode(error, "Error setting headstage LED state.");
 }
 
+void Neuropix::Net::NeuropixBasestation::SetFilter(FilterBandwidth filter)
+{
+	BaseConfigErrorCode error = api->neuropix_setFilter((int)filter);
+	ThrowExceptionForBaseConfigErrorCode(error, "Unable to set filter bandwidth.");
+}
+
+void Neuropix::Net::NeuropixBasestation::SetNrst(bool nrst)
+{
+	DigitalControlErrorCode error = api->neuropix_nrst(nrst);
+	ThrowExceptionForDigitalControlErrorCode(error, "Unable to set nrst register.");
+}
+
 void Neuropix::Net::NeuropixBasestation::NeuralStart()
 {
 	ConfigAccessErrorCode error = api->neuropix_setNeuralStart();
 	ThrowExceptionForConfigAccessErrorCode(error, "Unable to set neural start trigger.");
+}
+
+void Neuropix::Net::NeuropixBasestation::ResetDatapath()
+{
+	ErrorCode error = api->neuropix_resetDatapath();
+	ThrowExceptionForErrorCode(error, "Error resetting datapath.");
 }
 
 void Neuropix::Net::NeuropixBasestation::ReadElectrodeData(ElectrodePacket ^packet)
