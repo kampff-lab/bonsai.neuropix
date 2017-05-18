@@ -48,6 +48,18 @@ namespace Neuropix
 			HighPass1kHz = 3
 		};
 
+		public enum class GainSetting
+		{
+			Gain50 = 0,
+			Gain125 = 1,
+			Gain250 = 2,
+			Gain500 = 3,
+			Gain1000 = 4,
+			Gain1500 = 5,
+			Gain2000 = 6,
+			Gain2500 = 7,
+		};
+
 		public ref class NeuropixBasestation
 		{
 		private:
@@ -80,6 +92,9 @@ namespace Neuropix
 
 			void StartLog();
 			void LedOff(bool ledOff);
+
+			void WriteAllAPGains(GainSetting apGain);
+			void WriteAllLFPGains(GainSetting lfpGain);
 
 			void ApplyAdcCalibrationFromEeprom();
 			void ApplyAdcCalibrationFromCsv(String ^comparatorCalibrationFileName, String ^adcOffsetCalibrationFileName, String ^adcSlopeCalibrationFileName);

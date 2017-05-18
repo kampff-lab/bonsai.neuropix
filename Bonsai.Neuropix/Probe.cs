@@ -42,6 +42,14 @@ namespace Bonsai.Neuropix
         [Description("Indicates whether the headstage LEDs should be turned off.")]
         public bool LedOff { get; set; }
 
+        [Category("Configuration")]
+        [Description("The gain setting used for all AP channels.")]
+        public GainSetting GainAP { get; set; }
+
+        [Category("Configuration")]
+        [Description("The gain setting used for all LFP channels.")]
+        public GainSetting GainLFP { get; set; }
+
         [Category("Calibration")]
         [FileNameFilter("CSV Files (*.csv)|*.csv|All files (*.*)|*.*")]
         [Description("The path to a CSV file containing ADC comparator calibration data.")]
@@ -64,7 +72,7 @@ namespace Bonsai.Neuropix
         [FileNameFilter("CSV Files (*.csv)|*.csv|All files (*.*)|*.*")]
         [Description("The path to a CSV file containing gain correction data.")]
         [Editor("Bonsai.Design.OpenFileNameEditor, Bonsai.Design", typeof(UITypeEditor))]
-        public string GainCalibration { get; set; }
+        public string GainCorrection { get; set; }
 
         public override IObservable<NeuropixDataFrame> Generate()
         {
@@ -101,13 +109,16 @@ namespace Bonsai.Neuropix
                         else basestation.ApplyAdcCalibrationFromEeprom();
                         Console.WriteLine("OK");
 
+                        Console.WriteLine("Neuropix setting gain and filter bandwidth... ");
+                        basestation.WriteAllAPGains(GainAP);
+                        basestation.WriteAllLFPGains(GainLFP);
                         basestation.SetFilter(FilterBandwidth);
 
-                        Console.Write("Neuropix Gain calibration... ");
-                        var gainCalibration = GainCalibration;
-                        if(!string.IsNullOrEmpty(gainCalibration))
+                        Console.Write("Neuropix Gain correction... ");
+                        var gainCorrection = GainCorrection;
+                        if(!string.IsNullOrEmpty(gainCorrection))
                         {
-                            basestation.ApplyGainCalibrationFromCsv(gainCalibration);
+                            basestation.ApplyGainCalibrationFromCsv(gainCorrection);
                         }
                         else basestation.ApplyGainCalibrationFromEeprom();
                         Console.WriteLine("OK");

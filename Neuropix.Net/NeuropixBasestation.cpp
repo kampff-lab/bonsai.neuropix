@@ -99,6 +99,18 @@ void Neuropix::Net::NeuropixBasestation::Close()
 	api->neuropix_close();
 }
 
+void Neuropix::Net::NeuropixBasestation::WriteAllAPGains(GainSetting apGain)
+{
+	BaseConfigErrorCode error = api->neuropix_writeAllAPGains((int)apGain);
+	ThrowExceptionForBaseConfigErrorCode(error, "Unable to write AP gains.");
+}
+
+void Neuropix::Net::NeuropixBasestation::WriteAllLFPGains(GainSetting lfpGain)
+{
+	BaseConfigErrorCode error = api->neuropix_writeAllLFPGains((int)lfpGain);
+	ThrowExceptionForBaseConfigErrorCode(error, "Unable to write LFP gains.");
+}
+
 void Neuropix::Net::NeuropixBasestation::ApplyAdcCalibrationFromEeprom()
 {
 	ErrorCode error = api->neuropix_applyAdcCalibrationFromEeprom();
