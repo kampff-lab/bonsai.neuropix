@@ -20,6 +20,14 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForErrorCode(ErrorCode er
 	}
 }
 
+void Neuropix::Net::NeuropixBasestation::ThrowExceptionForOpenErrorCode(OpenErrorCode error, String ^message)
+{
+	if (error != OPEN_SUCCESS)
+	{
+		throw gcnew System::InvalidOperationException(message);
+	}
+}
+
 void Neuropix::Net::NeuropixBasestation::ThrowExceptionForConfigAccessErrorCode(ConfigAccessErrorCode error, String ^message)
 {
 	if (error != CONFIG_SUCCESS)
@@ -76,18 +84,14 @@ void Neuropix::Net::NeuropixBasestation::Open()
 void Neuropix::Net::NeuropixBasestation::Open(Byte headstageSelect)
 {
 	OpenErrorCode error = api->neuropix_open(headstageSelect);
-	if (error != OPEN_SUCCESS)
-	{
-	}
+	ThrowExceptionForOpenErrorCode(error, "Unable to open data and configuration link to neuropixel basestation.");
 }
 
 void Neuropix::Net::NeuropixBasestation::Open(String ^playbackFile)
 {
 	std::string _playbackFile = msclr::interop::marshal_as<std::string>(playbackFile);
 	OpenErrorCode error = api->neuropix_open(_playbackFile);
-	if (error != OPEN_SUCCESS)
-	{
-	}
+	ThrowExceptionForOpenErrorCode(error, "Unable to open the specified neuropixel data file.");
 }
 
 void Neuropix::Net::NeuropixBasestation::Close()

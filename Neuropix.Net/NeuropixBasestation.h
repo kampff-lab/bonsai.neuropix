@@ -53,6 +53,7 @@ namespace Neuropix
 		private:
 			Neuropix_basestation_api *api;
 			static void ThrowExceptionForErrorCode(ErrorCode error, String ^message);
+			static void ThrowExceptionForOpenErrorCode(OpenErrorCode error, String ^message);
 			static void ThrowExceptionForConfigAccessErrorCode(ConfigAccessErrorCode error, String ^message);
 			static void ThrowExceptionForEepromErrorCode(EepromErrorCode error, String ^message);
 			static void ThrowExceptionForDigitalControlErrorCode(DigitalControlErrorCode error, String ^message);
