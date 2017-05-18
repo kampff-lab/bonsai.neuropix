@@ -16,8 +16,24 @@ namespace Neuropix
 		public:
 			ElectrodePacket();
 
+			property IntPtr StartTrigger {
+				IntPtr get() { return (IntPtr)packet->startTrigger; }
+			}
+
+			property IntPtr Synchronization {
+				IntPtr get() { return (IntPtr)packet->synchronization; }
+			}
+
+			property IntPtr Counters {
+				IntPtr get() { return (IntPtr)packet->ctrs; }
+			}
+
 			property IntPtr LfpData {
 				IntPtr get() { return (IntPtr)packet->lfpData; }
+			}
+
+			property IntPtr ApData {
+				IntPtr get() { return (IntPtr)packet->apData; }
 			}
 		};
 	}
