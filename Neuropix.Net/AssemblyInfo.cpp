@@ -11,12 +11,12 @@ using namespace System::Security::Permissions;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
-[assembly:AssemblyTitleAttribute("NeuropixNet")];
+[assembly:AssemblyTitleAttribute("Neuropix.Net")];
 [assembly:AssemblyDescriptionAttribute("")];
 [assembly:AssemblyConfigurationAttribute("")];
-[assembly:AssemblyCompanyAttribute("")];
-[assembly:AssemblyProductAttribute("NeuropixNet")];
-[assembly:AssemblyCopyrightAttribute("Copyright (c)  2017")];
+[assembly:AssemblyCompanyAttribute("Kampff Lab")];
+[assembly:AssemblyProductAttribute("Neuropix.Net")];
+[assembly:AssemblyCopyrightAttribute("Copyright (c) Kampff Lab 2017")];
 [assembly:AssemblyTrademarkAttribute("")];
 [assembly:AssemblyCultureAttribute("")];
 
@@ -31,10 +31,6 @@ using namespace System::Security::Permissions;
 // You can specify all the value or you can default the Revision and Build Numbers
 // by using the '*' as shown below:
 
-[assembly:AssemblyVersionAttribute("1.0.*")];
-
 [assembly:ComVisible(false)];
-
 [assembly:CLSCompliantAttribute(true)];
-
-[assembly:SecurityPermission(SecurityAction::RequestMinimum, UnmanagedCode = true)];
+[assembly:AssemblyVersionAttribute("1.0.0.0")];
