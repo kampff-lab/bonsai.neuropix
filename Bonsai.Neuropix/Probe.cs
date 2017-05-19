@@ -134,7 +134,7 @@ namespace Bonsai.Neuropix
                         {
                             PathHelper.EnsureDirectory(fileName);
                             fileName = PathHelper.AppendSuffix(fileName, StreamingSuffix);
-                            basestation.StartRecording(StreamingFileName);
+                            basestation.StartRecording(fileName);
                         }
                         Console.WriteLine("Neuropix recording armed.");
 
