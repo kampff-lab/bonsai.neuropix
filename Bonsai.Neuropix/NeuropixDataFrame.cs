@@ -54,7 +54,7 @@ namespace Bonsai.Neuropix
                     CV.Copy(startTriggerHeader, startTrigger.GetSubRect(new Rect(i * SampleCount, 0, startTriggerHeader.Cols, startTriggerHeader.Rows)));
                     CV.Copy(synchronizationHeader, synchronization.GetSubRect(new Rect(i * SampleCount, 0, synchronizationHeader.Cols, synchronizationHeader.Rows)));
                     CV.Transpose(countersHeader, counters.GetSubRect(new Rect(i * SampleCount, 0, countersHeader.Rows, countersHeader.Cols)));
-                    CV.Copy(lfpDataHeader, lfpData.GetSubRect(new Rect(i * SampleCount, 0, lfpDataHeader.Cols, lfpDataHeader.Rows)));
+                    CV.Copy(lfpDataHeader, lfpData.GetSubRect(new Rect(i, 0, lfpDataHeader.Cols, lfpDataHeader.Rows)));
                     CV.Transpose(apDataHeader, apData.GetSubRect(new Rect(i * SampleCount, 0, apDataHeader.Rows, apDataHeader.Cols)));
                 }
             }
