@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NeuropixDataFrame.cs" />
+    <Compile Include="File.cs" />
     <Compile Include="Probe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
