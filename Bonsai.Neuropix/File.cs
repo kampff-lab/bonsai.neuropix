@@ -45,35 +45,41 @@ namespace Bonsai.Neuropix
                     using (var sampleSignal = new ManualResetEvent(false))
                     {
                         basestation.Open(Path);
-                        basestation.Mode = AsicMode.Recording;
-                        basestation.DataMode = true;
-
-                        var packets = new ElectrodePacket[BufferSize];
-                        for (int i = 0; i < packets.Length; i++)
+                        try
                         {
-                            packets[i] = new ElectrodePacket();
-                        }
+                            basestation.Mode = AsicMode.Recording;
+                            basestation.DataMode = true;
 
-                        while (!cancellationToken.IsCancellationRequested)
-                        {
-                            stopwatch.Restart();
+                            var packets = new ElectrodePacket[BufferSize];
                             for (int i = 0; i < packets.Length; i++)
                             {
-                                basestation.ReadElectrodeData(packets[i]);
+                                packets[i] = new ElectrodePacket();
                             }
-                            var result = new NeuropixDataFrame(packets, 0);
-                            observer.OnNext(result);
 
-                            var frequency = Frequency;
-                            var sampleInterval = frequency > 0 ? 1000.0 / Frequency : 0;
-                            var dueTime = Math.Max(0, (sampleInterval * packets.Length * NeuropixDataFrame.SampleCount) - stopwatch.Elapsed.TotalMilliseconds);
-                            if (dueTime > 0)
+                            while (!cancellationToken.IsCancellationRequested)
                             {
-                                sampleSignal.WaitOne(TimeSpan.FromMilliseconds(dueTime));
+                                stopwatch.Restart();
+                                for (int i = 0; i < packets.Length; i++)
+                                {
+                                    if (!basestation.ReadElectrodeData(packets[i]))
+                                    {
+                                        observer.OnCompleted();
+                                        return;
+                                    }
+                                }
+                                var result = new NeuropixDataFrame(packets, 0);
+                                observer.OnNext(result);
+
+                                var frequency = Frequency;
+                                var sampleInterval = frequency > 0 ? 1000.0 / Frequency : 0;
+                                var dueTime = Math.Max(0, (sampleInterval * packets.Length * NeuropixDataFrame.SampleCount) - stopwatch.Elapsed.TotalMilliseconds);
+                                if (dueTime > 0)
+                                {
+                                    sampleSignal.WaitOne(TimeSpan.FromMilliseconds(dueTime));
+                                }
                             }
                         }
-
-                        basestation.Close();
+                        finally { basestation.Close(); }
                     }
                 },
                 cancellationToken,

@@ -290,10 +290,12 @@ void Neuropix::Net::NeuropixBasestation::ResetDatapath()
 	ThrowExceptionForErrorCode(error, "Error resetting datapath.");
 }
 
-void Neuropix::Net::NeuropixBasestation::ReadElectrodeData(ElectrodePacket ^packet)
+bool Neuropix::Net::NeuropixBasestation::ReadElectrodeData(ElectrodePacket ^packet)
 {
 	ReadErrorCode error = api->neuropix_readElectrodeData(*(packet->packet));
+	if (error == DATA_BUFFER_EMPTY) return false;
 	ThrowExceptionForReadErrorCode(error, "Unable to read electrode data.");
+	return true;
 }
 
 void Neuropix::Net::NeuropixBasestation::StartRecording(String ^fileName)

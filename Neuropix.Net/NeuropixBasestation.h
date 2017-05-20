@@ -145,7 +145,7 @@ namespace Neuropix
 
 			void NeuralStart();
 			void ResetDatapath();
-			void ReadElectrodeData(ElectrodePacket ^packet);
+			bool ReadElectrodeData(ElectrodePacket ^packet);
 			void StartRecording(String ^fileName);
 			void StopRecording();
 
