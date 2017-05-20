@@ -1,6 +1,7 @@
 #pragma once
 
 using namespace System;
+using namespace System::Runtime::Serialization;
 #include "Neuropix_basestation_api.h"
 #include "ElectrodePacket.h"
 
@@ -58,6 +59,41 @@ namespace Neuropix
 			Gain1500 = 5,
 			Gain2000 = 6,
 			Gain2500 = 7,
+		};
+
+		[SerializableAttribute]
+		public ref class NeuropixException : public Exception
+		{
+		private:
+			int errorCode;
+		public:
+			NeuropixException() { };
+			NeuropixException(String ^message): Exception(message) { }
+			NeuropixException(String ^message, Exception ^innerException) : Exception(message, innerException) { }
+			NeuropixException(String ^message, int errorCode): Exception(message), errorCode(errorCode) { }
+			NeuropixException(String ^message, int errorCode, Exception ^innerException) : Exception(message, innerException), errorCode(errorCode) { }
+
+			property int ErrorCode
+			{
+				int get() { return errorCode; }
+			}
+
+			void GetObjectData(SerializationInfo ^info, StreamingContext context) override
+			{
+				if (info == nullptr)
+				{
+					throw gcnew ArgumentNullException("info");
+				}
+
+				info->AddValue("ErrorCode", errorCode);
+				Exception::GetObjectData(info, context);
+			}
+		protected:
+			NeuropixException(SerializationInfo ^info, StreamingContext context):
+				Exception(info, context),
+				errorCode((int)info->GetValue("ErrorCode", Int32::typeid))
+			{
+			}
 		};
 
 		public ref class NeuropixBasestation

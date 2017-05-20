@@ -16,7 +16,7 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForErrorCode(ErrorCode er
 {
 	if (error != SUCCESS)
 	{
-		throw gcnew System::InvalidOperationException(message);
+		throw gcnew NeuropixException(message, error);
 	}
 }
 
@@ -24,7 +24,7 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForOpenErrorCode(OpenErro
 {
 	if (error != OPEN_SUCCESS)
 	{
-		throw gcnew System::InvalidOperationException(message);
+		throw gcnew NeuropixException(message, error);
 	}
 }
 
@@ -32,7 +32,7 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForConfigAccessErrorCode(
 {
 	if (error != CONFIG_SUCCESS)
 	{
-		throw gcnew System::InvalidOperationException(message);
+		throw gcnew NeuropixException(message, error);
 	}
 }
 
@@ -40,7 +40,7 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForEepromErrorCode(Eeprom
 {
 	if (error != EEPROM_SUCCESS)
 	{
-		throw gcnew System::InvalidOperationException(message);
+		throw gcnew NeuropixException(message, error);
 	}
 }
 
@@ -48,7 +48,7 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForDigitalControlErrorCod
 {
 	if (error != DIGCTRL_SUCCESS)
 	{
-		throw gcnew System::InvalidOperationException(message);
+		throw gcnew NeuropixException(message, error);
 	}
 }
 
@@ -56,7 +56,7 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForReadCsvErrorCode(ReadC
 {
 	if (error != READCSV_SUCCESS)
 	{
-		throw gcnew System::InvalidOperationException(message);
+		throw gcnew NeuropixException(message, error);
 	}
 }
 
@@ -64,7 +64,7 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForBaseConfigErrorCode(Ba
 {
 	if (error != BASECONFIG_SUCCESS)
 	{
-		throw gcnew System::InvalidOperationException(message);
+		throw gcnew NeuropixException(message, error);
 	}
 }
 
@@ -72,7 +72,7 @@ void Neuropix::Net::NeuropixBasestation::ThrowExceptionForReadErrorCode(ReadErro
 {
 	if (error != READ_SUCCESS)
 	{
-		throw gcnew System::InvalidOperationException(message);
+		throw gcnew NeuropixException(message, error);
 	}
 }
 
