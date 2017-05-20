@@ -27,7 +27,7 @@ namespace Bonsai.Neuropix
         [Category("Acquisition")]
         [FileNameFilter("NPX Files (*.npx)|*.npx|All files (*.*)|*.*")]
         [Description("The path to the NPX file used to record all acquisition data.")]
-        [Editor("Bonsai.Design.OpenFileNameEditor, Bonsai.Design", typeof(UITypeEditor))]
+        [Editor("Bonsai.Design.SaveFileNameEditor, Bonsai.Design", typeof(UITypeEditor))]
         public string StreamingFileName { get; set; }
 
         [Category("Acquisition")]
