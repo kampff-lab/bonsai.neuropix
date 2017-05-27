@@ -100,10 +100,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Externals\libNeuropix\bin\libNeuropix_basestation_api_msvc.dll">
+    <None Include="..\Externals\libNeuropix\bin\libNeuropix_basestation_api_msvc.dll">
       <Link>libNeuropix_basestation_api_msvc.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
