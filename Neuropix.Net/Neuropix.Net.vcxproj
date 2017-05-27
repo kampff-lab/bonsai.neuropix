@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0BEBE3F4-C8FD-4D18-B4C2-37F8B65B90BE}</ProjectGuid>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>NeuropixNet</RootNamespace>
   </PropertyGroup>
